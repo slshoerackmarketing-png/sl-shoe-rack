@@ -6,7 +6,7 @@ Live: https://sl-shoe-rack.pages.dev (TODO: confirm the Cloudflare Pages project
 
 ## Run locally
 
-Needs Node 22.12 or newer (Astro 7 requirement). In the GitHub repo this site lives in the `CL-00001-00001-SL01/Code` folder; run the commands from there.
+Needs Node 22.12 or newer (Astro 7 requirement). Run the commands from the folder that holds `package.json`.
 
 ```sh
 npm install
