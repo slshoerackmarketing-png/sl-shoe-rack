@@ -5,7 +5,7 @@ import Footer from '../components/Footer.astro';
 import WhatsAppButton from '../components/WhatsAppButton.astro';
 import site from '../data/site.json';
 import { rackMinPrice } from '../lib/catalog.ts';
-import { formatINR } from '../lib/format.ts';
+import { formatINR, isSet } from '../lib/format.ts';
 
 interface Props {
   title?: string;
@@ -31,6 +31,7 @@ const ogImage = new URL('/og-image.jpg', Astro.site);
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     {noindex && <meta name="robots" content="noindex, follow" />}
+    {isSet(site.googleSiteVerification) && <meta name="google-site-verification" content={site.googleSiteVerification} />}
     <meta name="theme-color" content="#F5F7F8" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#14181B" media="(prefers-color-scheme: dark)" />
     <meta name="color-scheme" content="light dark" />
