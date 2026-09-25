@@ -1,0 +1,153 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import ProductPhoto from '../../components/ProductPhoto.astro';
+import SeoSchema from '../../components/SeoSchema.astro';
+import site from '../../data/site.json';
+import { products, type Product } from '../../lib/catalog.ts';
+
+export const getStaticPaths = () => products.map((p) => ({ params: { id: p.id }, props: { product: p } }));
+
+const { product: p } = Astro.props as { product: Product };
+const inCm = (n: number | null) => (n ? `${n} in (${Math.round(n * 2.54)} cm)` : 'Size on request');
+const related = products.filter((r) => r.categoryId === p.categoryId && r.id !== p.id);
+const isRack = p.kind === 'rack';
+const noun = isRack ? 'shoe rack' : '';
+const specs: [string, string][] = (
+  isRack
+    ? [
+        ['Height', inCm(p.heightIn)],
+        ['Width', inCm(p.widthIn)],
+        ['Depth (closed)', inCm(p.depthIn)],
+        ['Depth (door open)', inCm(p.openDepthIn)],
+        ['Holds', p.capacity ?? 'Ask us'],
+        ['Steps', `${p.steps}`],
+        ['Type', `${p.categoryName}, wall-mounted`],
+        ['Material', 'Steel, powder-coated finish'],
+      ]
+    : [
+        ['Size', p.size],
+        ['Holds', p.capacity ?? 'Ask us'],
+        ['Type', 'Ceiling-mounted, pulley and rope'],
+      ]
+) as [string, string][];
+if (p.colours.length) specs.push(['Colours', `${p.colours.join(', ')}. Same price for every colour.`]);
+if (isRack) specs.push(['Warranty', '10 years on the colour']);
+specs.push(['Delivery', p.deliveryNote]);
+const backHref = isRack ? '/#racks' : '/#hangers';
+const backLabel = isRack ? 'Shoe racks' : 'Cloth hangers';
+---
+<Base
+  title={isRack
+    ? `${p.title} Metal Shoe Rack, ${p.priceLabel} | ${site.name}, Davangere`
+    : `${p.title}, ${p.priceLabel} | ${site.name}, Davangere`}
+  description={isRack
+    ? `${p.title} wall-mounted metal shoe rack for ${p.priceLabel}. ${p.size}, holds ${p.capacity}. Powder-coated steel. Available at ${site.name}, ${site.address.street}, Davangere.`
+    : `${p.title} ceiling cloth drying hanger for ${p.priceLabel}. Holds ${p.capacity}. Available at ${site.name}, ${site.address.street}, Davangere.`}
+>
+  <SeoSchema slot="head" product={p} />
+  <section class="section pd">
+    <div class="wrap">
+      <nav aria-label="Breadcrumb" class="crumbs">
+        <a href="/">Home</a> <span aria-hidden="true">/</span> <a href={backHref}>{backLabel}</a>{' '}
+        <span aria-hidden="true">/</span> <span aria-current="page">{p.title}</span>
+      </nav>
+      <div class="pd-grid">
+        <div class="pd-media">
+          <ProductPhoto product={p} eager sizes="(min-width: 1080px) 560px, 100vw" />
+        </div>
+        <div>
+          <h1>{p.title}{noun && ` ${noun}`}</h1>
+          <p class="muted">{p.description}</p>
+          <p class="pd-price"><span class="price">{p.priceLabel}</span> <span class="muted small">incl. GST</span></p>
+          <div class="btn-row">
+            <a class="btn btn-wa" href={p.wa} target="_blank" rel="noopener"><Icon name="whatsapp" /> Chat on WhatsApp</a>
+            <a class="btn btn-ghost" href={`tel:${site.phoneIntl}`}><Icon name="phone" /> Call the shop</a>
+          </div>
+          <dl class="specs">
+            {specs.map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}
+          </dl>
+          <p class="muted small">Prices may change, confirm on WhatsApp or call.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  {related.length > 0 && (
+    <section class="section" aria-labelledby="related-title">
+      <div class="wrap">
+        <h2 id="related-title">Other {p.categoryName.toLowerCase()} {isRack ? 'racks' : 'sizes'}</h2>
+        <div class="rel">
+          {related.map((r) => <ProductCard product={r} />)}
+        </div>
+      </div>
+    </section>
+  )}
+</Base>
+
+<style>
+  .pd {
+    padding-top: 24px;
+  }
+  .crumbs {
+    font-size: 0.875rem;
+    color: var(--graphite-soft);
+    margin-bottom: 24px;
+  }
+  .crumbs a {
+    display: inline-block;
+    padding: 12px 0;
+  }
+  .pd-grid {
+    display: grid;
+    gap: 32px;
+  }
+  .pd-media {
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    border: 1px solid var(--line);
+    align-self: start;
+  }
+  .pd-price {
+    margin: 20px 0 24px;
+  }
+  .pd-price .price {
+    font-size: 2.25rem;
+  }
+  .specs {
+    margin: 32px 0 20px;
+    border-top: 2px solid var(--graphite);
+  }
+  .specs div {
+    display: grid;
+    grid-template-columns: minmax(110px, 0.8fr) 1.2fr;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .specs dt {
+    font-weight: 600;
+  }
+  .specs dd {
+    margin: 0;
+    color: var(--graphite-soft);
+  }
+  .small {
+    font-size: 0.875rem;
+  }
+  .rel {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  }
+  @media (min-width: 1080px) {
+    .pd-grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 56px;
+    }
+    .rel {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+  }
+</style>

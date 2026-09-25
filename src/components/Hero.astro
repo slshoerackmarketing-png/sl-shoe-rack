@@ -1,0 +1,111 @@
+---
+import { Picture } from 'astro:assets';
+import site from '../data/site.json';
+import { rackMinPrice } from '../lib/catalog.ts';
+import { formatINR, formatTime } from '../lib/format.ts';
+import { waLink } from '../lib/whatsapp.ts';
+import Icon from './Icon.astro';
+import RackLineup from './RackLineup.astro';
+
+// A real photo named hero/showroom-lineup.jpg replaces the generated illustration automatically.
+const heroes = import.meta.glob<{ default: ImageMetadata }>(
+  '/src/assets/images/hero/showroom-lineup*.{jpg,jpeg,png,webp}',
+  { eager: true },
+);
+const [heroPath, heroMod] =
+  Object.entries(heroes).sort(([a], [b]) => Number(a.includes('.illustration')) - Number(b.includes('.illustration')))[0] ?? [];
+const showroom = heroMod?.default;
+const isIllustration = heroPath?.includes('.illustration');
+---
+<section class="hero" aria-labelledby="hero-title">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <h1 id="hero-title">Metal shoe racks that fit your wall.</h1>
+      <p class="lede">
+        Wall-mounted single and double decker racks, from {formatINR(rackMinPrice)}. Delivered across {site.address.city}.
+      </p>
+      <div class="btn-row">
+        <a class="btn btn-wa" href={waLink()} target="_blank" rel="noopener">
+          <Icon name="whatsapp" /> Chat on WhatsApp
+        </a>
+        <a class="btn btn-ghost" href="#racks">See prices</a>
+      </div>
+      <ul class="facts">
+        <li><Icon name="pin" size={18} /> {site.address.street}, {site.address.city}</li>
+        <li><Icon name="clock" size={18} /> {formatTime(site.hours.open)} – {formatTime(site.hours.close)}</li>
+        <li><Icon name="store" size={18} /> Retail and wholesale</li>
+      </ul>
+    </div>
+    <RackLineup />
+  </div>
+  {showroom && (
+    <figure class="wrap hero-fig">
+      <Picture
+        src={showroom}
+        formats={['avif', 'webp']}
+        widths={[480, 800, 1120]}
+        sizes="(min-width: 1184px) 1120px, 100vw"
+        alt={isIllustration
+          ? 'Illustration of single and double decker metal shoe racks lined up by height in grey white, coffee white, ivory and black'
+          : 'SL Shoe Rack showroom with metal shoe racks lined up by height'}
+        class="hero-photo"
+        loading="lazy"
+        decoding="async"
+      />
+    </figure>
+  )}
+</section>
+
+<style>
+  .hero {
+    padding-block: clamp(32px, 6vw, 72px) clamp(48px, 7vw, 88px);
+  }
+  .hero-grid {
+    display: grid;
+    gap: 44px;
+  }
+  .lede {
+    font-size: clamp(1.0625rem, 1rem + 0.4vw, 1.25rem);
+    color: var(--graphite-soft);
+    margin-bottom: 24px;
+    max-width: 36ch;
+  }
+  .facts {
+    list-style: none;
+    padding: 0;
+    margin: 28px 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    font-size: 0.9375rem;
+    color: var(--graphite-soft);
+  }
+  .facts li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .facts :global(svg) {
+    color: var(--accent);
+  }
+  .hero-fig {
+    position: relative;
+    margin-top: 40px;
+    margin-bottom: 0;
+  }
+  .hero-fig .tag {
+    left: calc(var(--gutter) + 10px);
+  }
+  .hero-photo {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-card);
+  }
+  @media (min-width: 1080px) {
+    .hero-grid {
+      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+      align-items: center;
+      gap: 56px;
+    }
+  }
+</style>

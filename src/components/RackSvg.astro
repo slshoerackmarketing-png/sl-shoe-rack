@@ -1,0 +1,64 @@
+---
+// Front view of a wall-mounted rack: a steel body with one flip door per step.
+// With heightIn/widthIn it is drawn to scale (viewBox units = inches).
+// Without them it is an illustration only (fixed proportions, never shown as a size).
+interface Props {
+  steps: number;
+  columns?: number;
+  heightIn?: number | null;
+  widthIn?: number | null;
+  class?: string;
+  style?: string;
+}
+const { steps, columns = 1, heightIn, widthIn, class: cls, style } = Astro.props;
+const colW = widthIn ?? 25;
+const W = colW * columns;
+const H = heightIn ?? steps * 13 + 3;
+const pad = 1.6;
+const gap = 1.1;
+const doorH = (H - pad * 2 - gap * (steps - 1)) / steps;
+const doorW = colW - pad * 2 - (columns > 1 ? gap / 2 : 0);
+const doors = Array.from({ length: columns * steps }, (_, i) => {
+  const c = Math.floor(i / steps);
+  const r = i % steps;
+  const x = c * colW + pad + (c > 0 ? gap / 2 : 0);
+  const y = pad + r * (doorH + gap);
+  return { x, y };
+});
+const r = (n: number) => +n.toFixed(2);
+---
+<svg class:list={['rk', cls]} style={style} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMax meet" aria-hidden="true" focusable="false">
+  <rect class="rk-body" x="0.5" y="0.5" width={W - 1} height={H - 1} rx="0.8" />
+  {doors.map(({ x, y }) => (
+    <>
+      <rect class="rk-door" x={r(x)} y={r(y)} width={r(doorW)} height={r(doorH)} rx="0.5" />
+      <line class="rk-handle" x1={r(x + doorW * 0.36)} x2={r(x + doorW * 0.64)} y1={r(y + 1.6)} y2={r(y + 1.6)} />
+    </>
+  ))}
+</svg>
+<style>
+  .rk {
+    --rk-body: var(--surface);
+    --rk-door: var(--surface);
+    --rk-line: var(--accent);
+    overflow: visible;
+  }
+  .rk-body {
+    fill: var(--rk-body);
+    stroke: var(--rk-line);
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
+  }
+  .rk-door {
+    fill: var(--rk-door);
+    stroke: var(--rk-line);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+  .rk-handle {
+    stroke: var(--rk-line);
+    stroke-width: 2;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+  }
+</style>

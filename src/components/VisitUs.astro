@@ -1,0 +1,118 @@
+---
+import site from '../data/site.json';
+import { daysLabel, formatTime, isSet } from '../lib/format.ts';
+import Icon from './Icon.astro';
+
+const a = site.address;
+const q = encodeURIComponent(site.mapsQuery);
+const directions = `https://www.google.com/maps/search/?api=1&query=${q}`;
+const embed = `https://maps.google.com/maps?q=${q}&output=embed`;
+const hours = `${formatTime(site.hours.open)} – ${formatTime(site.hours.close)}`;
+const people = site.contactPeople.filter((p) => isSet(p.name)); // TODO: contact names from client
+---
+<section class="section" id="visit" aria-labelledby="visit-title">
+  <div class="wrap visit">
+    <div>
+      <div class="section-head">
+        <h2 id="visit-title">Visit us</h2>
+        <p>Come and see the racks at our shop on {a.street}.</p>
+      </div>
+      <dl class="info">
+        <div>
+          <dt><Icon name="pin" /> Address</dt>
+          <dd>
+            <address>{site.name}<br />{a.line1},<br />{a.street}, {a.city},<br />{a.state} {a.pincode}</address>
+          </dd>
+        </div>
+        <div>
+          <dt><Icon name="clock" /> Hours</dt>
+          <dd>
+            {daysLabel(site.hours.days) && <>{daysLabel(site.hours.days)}, </>}{hours}
+          </dd>
+        </div>
+        <div>
+          <dt><Icon name="phone" /> Phone and WhatsApp</dt>
+          <dd>
+            <a href={`tel:${site.phoneIntl}`}>{site.phoneDisplay}</a>
+            {people.map((p) => <><br />{p.name}{p.phone !== site.phoneIntl && <>: <a href={`tel:${p.phone}`}>{p.phone}</a></>}</>)}
+            {isSet(site.email) && <><br /><a href={`mailto:${site.email}`}>{site.email}</a></>}
+          </dd>
+        </div>
+        <div>
+          <dt><Icon name="truck" /> Delivery</dt>
+          <!-- TODO: confirm whether delivery and wall installation are included, and any charges -->
+          <dd>We deliver across the {site.deliveryArea}. Ask us about delivery to your area.</dd>
+        </div>
+      </dl>
+      <div class="btn-row">
+        <a class="btn" href={directions} target="_blank" rel="noopener"><Icon name="pin" /> Get directions</a>
+        <a class="btn btn-ghost" href={`tel:${site.phoneIntl}`}><Icon name="phone" /> Call the shop</a>
+      </div>
+    </div>
+    <div class="map">
+      <iframe
+        src={embed}
+        width="600"
+        height="450"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        title={`Map to ${site.name}`}></iframe>
+    </div>
+  </div>
+</section>
+<style>
+  .visit {
+    display: grid;
+    gap: 40px;
+  }
+  .info {
+    margin: 0 0 28px;
+    display: grid;
+    gap: 20px;
+  }
+  .info dt {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    margin-bottom: 4px;
+  }
+  .info dt :global(svg) {
+    color: var(--accent);
+  }
+  .info dd {
+    margin: 0 0 0 28px;
+    color: var(--graphite-soft);
+  }
+  address {
+    font-style: normal;
+  }
+  .map {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+  }
+  .map iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  @media (min-width: 768px) {
+    .map {
+      aspect-ratio: 16 / 9;
+    }
+  }
+  @media (min-width: 1080px) {
+    .visit {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+      align-items: center;
+      gap: 56px;
+    }
+  }
+</style>

@@ -1,0 +1,108 @@
+---
+import site from '../data/site.json';
+import { pricesIncludeGst, type Product } from '../lib/catalog.ts';
+import Icon from './Icon.astro';
+import ProductPhoto from './ProductPhoto.astro';
+
+interface Props {
+  product: Product;
+  headingLevel?: 'h3' | 'h4';
+}
+const { product: p, headingLevel: H = 'h3' } = Astro.props;
+---
+<article class="card">
+  <a class="card-media" href={p.url} tabindex="-1" aria-hidden="true">
+    <ProductPhoto product={p} />
+  </a>
+  <div class="card-body">
+    <H class="card-title"><a href={p.url}>{p.title}</a></H>
+    <p class="card-size">
+      {p.size}{p.capacity && <> · {p.kind === 'hanger' ? `holds ${p.capacity}` : p.capacity}</>}
+    </p>
+    {p.colours.length > 0 && <p class="card-colours">{p.colours.join(', ')}</p>}
+    <p class="card-price">
+      <span class="price">{p.priceLabel}</span>
+      {pricesIncludeGst && <span class="gst">incl. GST</span>}
+    </p>
+    <div class="card-actions">
+      <a class="btn btn-wa btn-sm" href={p.wa} target="_blank" rel="noopener">
+        <Icon name="whatsapp" /> Chat on WhatsApp
+      </a>
+      <a class="btn btn-ghost btn-sm" href={`tel:${site.phoneIntl}`} aria-label={`Call about the ${p.title}`}>
+        <Icon name="phone" /> Call
+      </a>
+    </div>
+  </div>
+</article>
+<style>
+  .card {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    transition:
+      border-color var(--t-std) var(--ease-std),
+      box-shadow var(--t-std) var(--ease-std);
+  }
+  .card:hover {
+    border-color: var(--powder);
+    box-shadow: 0 10px 24px -18px rgb(34 39 43 / 0.5);
+  }
+  .card-media {
+    display: block;
+    overflow: hidden;
+  }
+  .card-media :global(.pp) {
+    transition: transform var(--t-feat) var(--ease-out);
+  }
+  @media (hover: hover) {
+    .card:hover .card-media :global(.pp) {
+      transform: scale(1.025);
+    }
+  }
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 16px 16px 18px;
+  }
+  .card-title {
+    margin: 0 0 4px;
+  }
+  .card-title a {
+    color: var(--graphite);
+    text-decoration: none;
+  }
+  .card-title a:hover {
+    text-decoration: underline;
+  }
+  .card-colours {
+    margin: -10px 0 14px;
+    color: var(--graphite-soft);
+    font-size: 0.875rem;
+  }
+  .gst {
+    margin-left: 8px;
+    color: var(--graphite-soft);
+    font-size: 0.8125rem;
+  }
+  .card-size {
+    margin: 0 0 14px;
+    color: var(--graphite-soft);
+    font-size: 0.9375rem;
+  }
+  .card-price {
+    margin: 0 0 18px;
+  }
+  .card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: auto;
+  }
+  .card-actions .btn-wa {
+    flex: 1 1 auto;
+  }
+</style>

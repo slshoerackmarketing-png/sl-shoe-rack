@@ -1,0 +1,181 @@
+---
+import site from '../data/site.json';
+import Icon from './Icon.astro';
+const links = [
+  ['Racks', '/#racks'],
+  ['Sizes', '/#sizes'],
+  ['Hangers', '/#hangers'],
+  ['Installed', '/#installed'],
+  ['Visit us', '/#visit'],
+  ['Enquire', '/#enquire'],
+];
+---
+<header class="hdr">
+  <div class="wrap hdr-in">
+    <a class="brand" href="/">
+      <span class="brand-name">{site.shortName}</span>
+      <span class="brand-place">{site.address.city}</span>
+      <span class="sr-only">, home</span>
+    </a>
+    <nav aria-label="Main">
+      <ul class="nav">
+        {links.map(([label, href]) => <li><a href={href}>{label}</a></li>)}
+      </ul>
+    </nav>
+    <button class="theme" type="button" data-theme-toggle aria-label="Colour theme: automatic">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true" focusable="false">
+        <g class="t-auto"><circle cx="12" cy="12" r="8" /><path d="M12 4a8 8 0 0 1 0 16Z" fill="currentColor" /></g>
+        <g class="t-light"><circle cx="12" cy="12" r="4" /><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4" /></g>
+        <g class="t-dark"><path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10Z" /></g>
+      </svg>
+    </button>
+    <a class="call" href={`tel:${site.phoneIntl}`} aria-label={`Call the shop, ${site.phoneDisplay}`}>
+      <Icon name="phone" />
+      <span class="call-num">{site.phoneDisplay}</span>
+    </a>
+  </div>
+</header>
+<style>
+  .hdr {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--chalk);
+    border-bottom: 1px solid var(--line);
+  }
+  .hdr-in {
+    height: var(--header-h);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .brand {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 44px;
+    color: var(--graphite);
+    text-decoration: none;
+    line-height: 1;
+    margin-right: auto;
+  }
+  .brand:hover {
+    color: var(--graphite);
+  }
+  .brand-name {
+    font: 800 1.25rem/1 var(--font-head);
+    font-stretch: 87.5%;
+    letter-spacing: -0.02em;
+  }
+  .brand-place {
+    font-size: 0.75rem;
+    color: var(--graphite-soft);
+    margin-top: 3px;
+  }
+  .nav {
+    display: none;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 10px;
+    color: var(--graphite);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9375rem;
+    border-radius: var(--radius-pill);
+    transition: background-color var(--t-micro) var(--ease-std);
+  }
+  .nav a:hover {
+    background: var(--panel);
+  }
+  .theme {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--graphite);
+    cursor: pointer;
+    transition: background-color var(--t-micro) var(--ease-std);
+  }
+  .theme:hover {
+    background: var(--panel);
+  }
+  .theme g {
+    display: none;
+  }
+  :global(html:not([data-theme])) .t-auto,
+  :global(html[data-theme='light']) .t-light,
+  :global(html[data-theme='dark']) .t-dark {
+    display: inline;
+  }
+  .call {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: var(--radius-pill);
+    background: var(--steel);
+    color: var(--white);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    font-variant-numeric: tabular-nums;
+    transition: background-color var(--t-micro) var(--ease-std);
+  }
+  .call:hover {
+    background: var(--steel-deep);
+    color: var(--white);
+  }
+  .call-num {
+    display: none;
+  }
+  @media (min-width: 900px) {
+    .nav {
+      display: flex;
+    }
+  }
+  @media (min-width: 1180px) {
+    .hdr-in {
+      gap: 16px;
+    }
+    .nav a {
+      padding: 0 12px;
+    }
+    .call {
+      padding: 0 18px 0 14px;
+    }
+    .call-num {
+      display: inline;
+    }
+  }
+</style>
+<script>
+  // Cycle automatic → light → dark. Automatic follows the phone/system setting.
+  const btn = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+  const root = document.documentElement;
+  const label = () => {
+    const t = root.dataset.theme;
+    btn?.setAttribute('aria-label', `Colour theme: ${t ? t : 'automatic'}. Change`);
+  };
+  label();
+  btn?.addEventListener('click', () => {
+    const next = { undefined: 'light', light: 'dark', dark: undefined }[String(root.dataset.theme)] as string | undefined;
+    if (next) root.dataset.theme = next;
+    else delete root.dataset.theme;
+    try {
+      next ? localStorage.setItem('theme', next) : localStorage.removeItem('theme');
+    } catch {}
+    label();
+  });
+</script>

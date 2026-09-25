@@ -1,0 +1,421 @@
+---
+// Signature visual: racks drawn to scale side by side like the showroom lineup,
+// with a ruler and a ~40 in door-handle reference line. One stage per rack type.
+import { rackCategories } from '../lib/catalog.ts';
+import RackSvg from './RackSvg.astro';
+
+const groups = rackCategories
+  .map((c) => ({ ...c, racks: c.products.filter((p) => p.heightIn && p.widthIn) }))
+  .filter((g) => g.racks.length);
+const all = groups.flatMap((g) => g.racks);
+const tallest = Math.max(...all.map((r) => r.heightIn!));
+const scaleTop = Math.ceil((tallest + 3) / 10) * 10; // ruler headroom, e.g. 71 → 80
+const ticks = Array.from({ length: scaleTop / 10 + 1 }, (_, i) => i * 10);
+const defaultId = groups[0]?.racks[1]?.id ?? all[0]?.id;
+---
+<div class="lu" id="sizes" data-lineup style={`--top:${scaleTop}`}>
+  <div class="lu-head">
+    <h2>Sizes at a glance</h2>
+    <p>Drawn to scale, from {Math.min(...all.map((r) => r.heightIn!))} in to {tallest} in high. Tap a rack to see its price.</p>
+  </div>
+
+  {groups.length > 1 && (
+    <div class="lu-switch" data-lu-switch hidden>
+      {groups.map((g, i) => (
+        <button type="button" data-lu-group={g.id} aria-pressed={i === 0 ? 'true' : 'false'}>{g.name}</button>
+      ))}
+    </div>
+  )}
+
+  {groups.map((g) => (
+    <div class="lu-scroll" data-lu-stage={g.id}>
+      <div class="lu-stage" role="group" aria-label={`${g.name} racks, shortest to tallest`}>
+        <div class="lu-ruler" aria-hidden="true">
+          {ticks.map((t) => (
+            <span class:list={['lu-tick', { 'lu-tick-major': t % 20 === 0 }]} style={`--in:${t}`}>
+              {t % 20 === 0 && t > 0 && <b>{t}</b>}
+            </span>
+          ))}
+        </div>
+        <div class="lu-ref" aria-hidden="true"></div>
+        {g.racks.map((p) => (
+          <button
+            type="button"
+            class="lu-rack"
+            data-rack={p.id}
+            aria-pressed={p.id === defaultId ? 'true' : 'false'}
+            aria-controls="lu-card"
+            style={`--h:${p.heightIn};--w:${p.widthIn}`}
+          >
+            <span class="lu-fig">
+              <RackSvg steps={p.steps} columns={p.columns} heightIn={p.heightIn} widthIn={p.widthIn! / p.columns} />
+            </span>
+            <span class="lu-label">
+              <span class="lu-steps">{p.steps} step</span>
+              <span class="lu-price">{p.priceLabel}</span>
+            </span>
+            <span class="sr-only">, {g.name}, {p.size}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  ))}
+
+  <p class="lu-key"><span class="lu-key-line" aria-hidden="true"></span>Typical door handle height, about 40 in</p>
+  <div class="lu-card" id="lu-card" aria-live="polite">
+    {all.map((p) => (
+      <div class="lu-card-in" data-card={p.id} hidden={p.id !== defaultId}>
+        <div>
+          <p class="lu-card-title"><a href={p.url}>{p.title}</a></p>
+          <p class="lu-card-size">{p.size}{p.capacity && ` · ${p.capacity}`}</p>
+        </div>
+        <span class="price">{p.priceLabel}</span>
+        <a class="btn btn-wa btn-sm lu-card-cta" href={p.wa} target="_blank" rel="noopener">Ask about this rack</a>
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  .lu {
+    --ppi: 2.2px;
+    --label-h: 52px;
+    --ruler-w: 30px;
+    --gap: 12px;
+    min-width: 0;
+  }
+  .lu-switch {
+    display: inline-flex;
+    gap: 4px;
+    padding: 4px;
+    margin-bottom: 12px;
+    background: var(--panel);
+    border-radius: var(--radius-pill);
+  }
+  .lu-switch[hidden] {
+    display: none;
+  }
+  .lu-switch button {
+    min-height: 44px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: none;
+    color: var(--graphite);
+    font: 600 0.875rem/1 var(--font-body);
+    cursor: pointer;
+    transition:
+      background-color var(--t-std) var(--ease-std),
+      color var(--t-std) var(--ease-std);
+  }
+  .lu-switch button[aria-pressed='true'] {
+    background: var(--steel);
+    color: var(--white);
+  }
+  .lu-scroll[hidden] {
+    display: none;
+  }
+  .lu-scroll + .lu-scroll {
+    border-top: 0;
+  }
+  .lu-head p {
+    color: var(--graphite-soft);
+    margin-bottom: 20px;
+  }
+  .lu-scroll {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    /* headroom for the lifted rack */
+    padding: 28px 12px 12px 8px;
+  }
+  .lu-stage {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+    gap: var(--gap);
+    width: max-content;
+    min-width: 100%;
+    padding-left: calc(var(--ruler-w) + 10px);
+    height: calc(var(--top) * var(--ppi) + var(--label-h));
+  }
+  /* Floor */
+  .lu-stage::after {
+    content: '';
+    position: absolute;
+    left: calc(var(--ruler-w) - 6px);
+    right: 0;
+    bottom: var(--label-h);
+    border-top: 2px solid var(--graphite);
+  }
+  .lu-ruler {
+    position: absolute;
+    left: 0;
+    bottom: var(--label-h);
+    width: var(--ruler-w);
+    height: calc(var(--top) * var(--ppi));
+    border-right: 1px solid var(--powder);
+  }
+  .lu-tick {
+    position: absolute;
+    right: 0;
+    bottom: calc(var(--in) * var(--ppi));
+    width: 5px;
+    border-top: 1px solid var(--powder);
+  }
+  .lu-tick-major {
+    width: 9px;
+    border-color: var(--graphite-soft);
+  }
+  .lu-tick b {
+    position: absolute;
+    right: 13px;
+    top: -0.6em;
+    font: 500 0.6875rem/1 var(--font-body);
+    color: var(--graphite-soft);
+    font-variant-numeric: tabular-nums;
+  }
+  .lu-ref {
+    position: absolute;
+    left: var(--ruler-w);
+    right: 0;
+    bottom: calc(var(--label-h) + 40 * var(--ppi));
+    border-top: 1.5px dashed var(--accent);
+    pointer-events: none;
+    z-index: 2;
+  }
+  .lu-key {
+    max-width: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 0 16px 10px;
+    background: var(--surface);
+    border-inline: 1px solid var(--line);
+    font-size: 0.8125rem;
+    color: var(--accent);
+  }
+  .lu-key-line {
+    width: 24px;
+    border-top: 1.5px dashed var(--accent);
+  }
+  .lu-scroll {
+    border-bottom: 0;
+  }
+  .lu-rack {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 44px;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .lu-rack:focus-visible {
+    outline-offset: 4px;
+  }
+  .lu-fig {
+    position: relative;
+    display: block;
+    width: calc(var(--w) * var(--ppi));
+    height: calc(var(--h) * var(--ppi));
+  }
+  .lu-fig :global(svg) {
+    width: 100%;
+    height: 100%;
+    transition: transform var(--t-feat) var(--ease-out);
+  }
+  .lu-fig :global(.rk) {
+    --rk-body: var(--surface);
+    --rk-door: var(--chalk);
+    --rk-line: var(--accent);
+  }
+  .lu-fig :global(.rk-body),
+  .lu-fig :global(.rk-door) {
+    transition: fill var(--t-std) var(--ease-std);
+  }
+  /* Contact shadow on the floor, visible when the rack lifts */
+  .lu-fig::after {
+    content: '';
+    position: absolute;
+    left: 10%;
+    right: 10%;
+    bottom: -3px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgb(34 39 43 / 0.25);
+    opacity: 0;
+    transform: scaleX(0.6);
+    transition:
+      opacity var(--t-feat) var(--ease-out),
+      transform var(--t-feat) var(--ease-out);
+  }
+  .lu-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: var(--label-h);
+    line-height: 1.25;
+  }
+  .lu-steps {
+    font-size: 0.8125rem;
+    color: var(--graphite-soft);
+  }
+  .lu-price {
+    font: 700 0.9375rem/1.3 var(--font-head);
+    font-stretch: 87.5%;
+    font-variant-numeric: tabular-nums;
+    border-bottom: 2px solid transparent;
+    transition: border-color var(--t-std) var(--ease-std);
+  }
+  @media (hover: hover) {
+    .lu-rack:hover :global(svg) {
+      transform: translateY(-3px);
+    }
+  }
+  .lu-rack[aria-pressed='true'] :global(svg) {
+    transform: translateY(-10px);
+  }
+  .lu-rack[aria-pressed='true'] :global(.rk) {
+    --rk-body: var(--steel);
+    --rk-door: var(--sel-door);
+  }
+  .lu-rack[aria-pressed='true'] .lu-fig::after {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+  .lu-rack[aria-pressed='true'] .lu-steps {
+    color: var(--graphite);
+    font-weight: 500;
+  }
+  .lu-rack[aria-pressed='true'] .lu-price {
+    border-color: var(--marigold);
+  }
+
+  .lu-card {
+    border: 1px solid var(--line);
+    border-top: 0;
+    background: var(--surface);
+  }
+  .lu-card-in {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 12px 16px;
+    padding: 16px;
+  }
+  .lu-card-in[hidden] {
+    display: none;
+  }
+  .lu-card-in:not([hidden]) {
+    animation: card-in var(--t-std) var(--ease-out);
+  }
+  .lu-card-title {
+    margin: 0;
+    font: 700 1.0625rem/1.25 var(--font-head);
+    font-stretch: 87.5%;
+  }
+  .lu-card-title a {
+    color: var(--graphite);
+    text-decoration: none;
+  }
+  .lu-card-title a:hover {
+    text-decoration: underline;
+  }
+  .lu-card-size {
+    margin: 2px 0 0;
+    color: var(--graphite-soft);
+    font-size: 0.9375rem;
+  }
+  .lu-card-in .price {
+    font-size: 1.5rem;
+    justify-self: end;
+  }
+  .lu-card-cta {
+    grid-column: 1 / -1;
+  }
+  .lu-note {
+    margin: 12px 0 0;
+    font-size: 0.9375rem;
+    color: var(--graphite-soft);
+  }
+  @keyframes card-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
+  @media (min-width: 768px) {
+    .lu {
+      --ppi: 3.3px;
+      --gap: 40px;
+    }
+    .lu-card-in {
+      grid-template-columns: 1fr auto auto;
+      padding: 16px 20px;
+    }
+    .lu-card-cta {
+      grid-column: auto;
+    }
+  }
+  @media (min-width: 1080px) {
+    .lu {
+      --ppi: 3.4px;
+      --gap: 30px;
+    }
+    .lu-card-in {
+      grid-template-columns: 1fr auto;
+    }
+    .lu-card-cta {
+      grid-column: 1 / -1;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lu-rack[aria-pressed='true'] :global(svg),
+    .lu-rack:hover :global(svg) {
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>('[data-lineup]')) {
+    const buttons = [...root.querySelectorAll<HTMLButtonElement>('[data-rack]')];
+    const cards = root.querySelectorAll<HTMLElement>('[data-card]');
+    const stages = root.querySelectorAll<HTMLElement>('[data-lu-stage]');
+    const switches = root.querySelectorAll<HTMLButtonElement>('[data-lu-group]');
+    const pick = (btn: HTMLButtonElement) => {
+      buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+      cards.forEach((c) => (c.hidden = c.dataset.card !== btn.dataset.rack));
+    };
+    const show = (group: string) => {
+      switches.forEach((s) => s.setAttribute('aria-pressed', String(s.dataset.luGroup === group)));
+      stages.forEach((s) => (s.hidden = s.dataset.luStage !== group));
+      const inGroup = root.querySelectorAll<HTMLButtonElement>(`[data-lu-stage="${group}"] [data-rack]`);
+      pick(inGroup[1] ?? inGroup[0]);
+    };
+    root.addEventListener('click', (e) => {
+      const t = e.target as Element;
+      const rack = t.closest<HTMLButtonElement>('[data-rack]');
+      if (rack) return pick(rack);
+      const sw = t.closest<HTMLButtonElement>('[data-lu-group]');
+      if (sw) show(sw.dataset.luGroup!);
+    });
+    if (switches.length) {
+      root.querySelector<HTMLElement>('[data-lu-switch]')!.hidden = false;
+      show(switches[0].dataset.luGroup!);
+    }
+  }
+</script>

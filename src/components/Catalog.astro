@@ -1,0 +1,180 @@
+---
+import data from '../data/products.json';
+import site from '../data/site.json';
+import { pricesIncludeGst, rackCategories as categories } from '../lib/catalog.ts';
+import ProductCard from './ProductCard.astro';
+
+const updated = new Date(data.lastUpdated).toLocaleDateString('en-IN', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+---
+<section class="section" id="racks" aria-labelledby="racks-title">
+  <div class="wrap">
+    <div class="section-head cat-head">
+      <div>
+        <h2 id="racks-title">Prices</h2>
+        <p>Powder-coated metal shoe racks for homes, offices and apartments in {site.address.city}.</p>
+      </div>
+      <!-- Tabs are shown only when JS runs. Without JS both lists stay visible, stacked. -->
+      <div class="tabs" role="tablist" aria-label="Rack type" data-tabs hidden>
+        {categories.map((c, i) => (
+          <button
+            type="button"
+            role="tab"
+            id={`tab-${c.id}`}
+            aria-controls={`panel-${c.id}`}
+            aria-selected={i === 0 ? 'true' : 'false'}
+            tabindex={i === 0 ? 0 : -1}
+          >
+            {c.name}
+          </button>
+        ))}
+        <span class="tabs-ind" aria-hidden="true"></span>
+      </div>
+    </div>
+
+    {categories.map((c) => (
+      <div class="panel" id={`panel-${c.id}`} role="tabpanel" aria-labelledby={`tab-${c.id} head-${c.id}`} data-panel>
+        <div class="panel-head">
+          <h3 id={`head-${c.id}`}>{c.name}</h3>
+          <p class="muted">{c.description}</p>
+        </div>
+        <div class="grid">
+          {c.products.map((p) => <ProductCard product={p} headingLevel="h4" />)}
+        </div>
+      </div>
+    ))}
+
+    <p class="cat-note"><strong>{site.wholesaleNote}</strong></p>
+    <p class="cat-note muted">
+      {categories[0].deliveryNote} {pricesIncludeGst && 'All prices include GST. '}Last updated {updated}; prices may change, so confirm on WhatsApp or call before visiting.
+    </p>
+  </div>
+</section>
+
+<style>
+  .cat-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px 32px;
+  }
+  .tabs {
+    position: relative;
+    display: inline-grid;
+    grid-template-columns: repeat(2, 1fr);
+    padding: 4px;
+    background: var(--panel);
+    border-radius: var(--radius-pill);
+    --i: 0;
+  }
+  .tabs[hidden] {
+    display: none;
+  }
+  .tabs button {
+    position: relative;
+    z-index: 1;
+    min-height: 44px;
+    padding: 0 20px;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: none;
+    color: var(--graphite);
+    font: 600 0.9375rem/1 var(--font-body);
+    cursor: pointer;
+    transition: color var(--t-std) var(--ease-std);
+    white-space: nowrap;
+  }
+  .tabs button[aria-selected='true'] {
+    color: var(--white);
+  }
+  /* Sliding active indicator */
+  .tabs-ind {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: calc(50% - 4px);
+    border-radius: var(--radius-pill);
+    background: var(--steel);
+    transform: translateX(calc(var(--i) * 100%));
+    transition: transform var(--t-std) var(--ease-out);
+  }
+  .panel + .panel {
+    margin-top: 48px;
+  }
+  .panel[hidden] {
+    display: none;
+  }
+  .panel-head {
+    margin-bottom: 20px;
+  }
+  .panel-head p {
+    margin: 0;
+  }
+  /* With tabs active, the tab names the list; keep the heading for screen readers only. */
+  :global(.has-tabs) .panel-head h3 {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  :global(.has-tabs) .panel + .panel {
+    margin-top: 0;
+  }
+  .grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  }
+  .cat-note {
+    margin: 28px 0 0;
+  }
+  .cat-note + .cat-note {
+    margin-top: 6px;
+    font-size: 0.875rem;
+  }
+  @media (min-width: 1080px) {
+    .grid {
+      gap: 24px;
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>
+
+<script>
+  const tablist = document.querySelector<HTMLElement>('[data-tabs]');
+  if (tablist) {
+    const section = tablist.closest('section')!;
+    const tabs = [...tablist.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const panels = [...section.querySelectorAll<HTMLElement>('[data-panel]')];
+    const select = (i: number, focus = false) => {
+      tabs.forEach((t, j) => {
+        t.setAttribute('aria-selected', String(i === j));
+        t.tabIndex = i === j ? 0 : -1;
+      });
+      panels.forEach((p, j) => (p.hidden = i !== j));
+      tablist.style.setProperty('--i', String(i));
+      if (focus) tabs[i].focus();
+    };
+    tablist.addEventListener('click', (e) => {
+      const i = tabs.indexOf((e.target as Element).closest('[role="tab"]') as HTMLButtonElement);
+      if (i >= 0) select(i);
+    });
+    tablist.addEventListener('keydown', (e) => {
+      const i = tabs.findIndex((t) => t.tabIndex === 0);
+      const next = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 }[e.key];
+      if (next === undefined) return;
+      e.preventDefault();
+      select((next + tabs.length) % tabs.length, true);
+    });
+    tablist.hidden = false;
+    section.classList.add('has-tabs');
+    select(0);
+  }
+</script>

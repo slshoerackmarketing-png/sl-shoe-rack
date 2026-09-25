@@ -1,0 +1,86 @@
+---
+import site from '../data/site.json';
+import { daysLabel, formatTime, isSet } from '../lib/format.ts';
+const a = site.address;
+const profileUrl = isSet(site.googleProfileUrl)
+  ? site.googleProfileUrl
+  : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(site.mapsQuery)}`;
+const hours = `${formatTime(site.hours.open)} – ${formatTime(site.hours.close)}`;
+---
+<footer class="ftr" data-fab-away>
+  <div class="wrap ftr-in">
+    <div>
+      <p class="ftr-name">{site.name}</p>
+      <p class="ftr-tag">{site.tagline}</p>
+    </div>
+    <address>
+      {a.line1},<br />{a.street}, {a.city}, {a.state} {a.pincode}<br />
+      <a href={`tel:${site.phoneIntl}`}>{site.phoneDisplay}</a>
+      {isSet(site.email) && <><br /><a href={`mailto:${site.email}`}>{site.email}</a></>}
+    </address>
+    <div>
+      <p>{daysLabel(site.hours.days) ? `${daysLabel(site.hours.days)}, ` : 'Open '}{hours}</p>
+      <p><a href={profileUrl} target="_blank" rel="noopener">{site.name} on Google Maps</a></p>
+      {isSet(site.instagramUrl) && <p><a href={site.instagramUrl} target="_blank" rel="noopener">Instagram</a></p>}
+    </div>
+  </div>
+  <div class="wrap ftr-base">
+    <p>© {new Date().getFullYear()} {site.name}</p>
+    <p>Website by <a href="https://aiandmlconsultants.com/" target="_blank" rel="noopener">Setu</a></p>
+  </div>
+</footer>
+<style>
+  .ftr {
+    background: var(--deep);
+    color: #dfe5ea;
+    padding: 48px 0 calc(88px + env(safe-area-inset-bottom));
+    font-size: 0.9375rem;
+  }
+  .ftr a {
+    color: var(--white);
+  }
+  .ftr a:hover {
+    color: var(--powder);
+  }
+  .ftr :focus-visible {
+    outline-color: var(--powder);
+  }
+  .ftr p {
+    margin: 0 0 8px;
+  }
+  address {
+    font-style: normal;
+    line-height: 1.7;
+  }
+  .ftr-in {
+    display: grid;
+    gap: 24px;
+  }
+  .ftr-name {
+    font: 800 1.25rem/1.1 var(--font-head);
+    font-stretch: 87.5%;
+    color: var(--white);
+  }
+  .ftr-tag {
+    color: var(--powder);
+  }
+  .ftr-base {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 4px 24px;
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid #3a4248;
+    color: #b9c3cb;
+    font-size: 0.875rem;
+  }
+  @media (min-width: 768px) {
+    .ftr {
+      padding-bottom: 40px;
+    }
+    .ftr-in {
+      grid-template-columns: 1.1fr 1.3fr 1fr;
+    }
+  }
+</style>

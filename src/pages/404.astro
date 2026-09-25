@@ -1,0 +1,18 @@
+---
+import Base from '../layouts/Base.astro';
+import site from '../data/site.json';
+import { waLink } from '../lib/whatsapp.ts';
+import Icon from '../components/Icon.astro';
+---
+<Base title={`Page not found | ${site.name}`} description="This page doesn't exist." noindex>
+  <section class="section">
+    <div class="wrap">
+      <h1>This page doesn't exist.</h1>
+      <p class="muted">The link may be old. Our racks and prices are one tap away.</p>
+      <div class="btn-row">
+        <a class="btn" href="/#racks">See prices</a>
+        <a class="btn btn-wa" href={waLink()} target="_blank" rel="noopener"><Icon name="whatsapp" /> Chat on WhatsApp</a>
+      </div>
+    </div>
+  </section>
+</Base>

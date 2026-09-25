@@ -1,0 +1,63 @@
+{
+  "name": "SL Shoe Rack Marketing",
+  "shortName": "SL Shoe Rack",
+  "googleProfileName": "SL SHOE RACK MARKETING DAVANGERE",
+  "tagline": "Strong. Stylish. Space saving.",
+  "phoneDisplay": "98864 04287",
+  "phoneIntl": "+919886404287",
+  "whatsapp": "919886404287",
+  "email": "slshoerackmarketing@gmail.com",
+  "address": {
+    "line1": "#24, Saptagiri Agency, beside Stadium Complex",
+    "street": "Hadadi Road",
+    "city": "Davangere",
+    "state": "Karnataka",
+    "pincode": "577004",
+    "country": "IN"
+  },
+  "hours": {
+    "days": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday"
+    ],
+    "open": "10:30",
+    "close": "21:30"
+  },
+  "deliveryArea": "Davangere region",
+  "googleProfileUrl": "https://maps.app.goo.gl/WmH83XweSpWqYWVY9",
+  "mapsQuery": "SL SHOE RACK MARKETING DAVANGERE",
+  "geo": {
+    "lat": null,
+    "lng": null
+  },
+  "web3formsKey": "1186f84f-95ea-4eed-a059-252a6ba80e22",
+  "wholesaleNote": "Wholesale and bulk orders: chat with us for rates.",
+  "contactPeople": [
+    {
+      "name": "Lingaraj D",
+      "role": "Contact person",
+      "phone": "+919886404287"
+    }
+  ],
+  "colours": [
+    "Grey white",
+    "Coffee white",
+    "Ivory",
+    "Black"
+  ],
+  "instagramUrl": "https://www.instagram.com/sl_shoe_rack_marketing_/",
+  "foundingYear": 2008,
+  "facts": [
+    "Making our own racks since 2008",
+    "Prices include GST",
+    "Free delivery and fitting within 10 km",
+    "Delivered within 2 hours in Davangere, next day to other districts",
+    "10-year warranty on the colour",
+    "Open all 7 days"
+  ]
+}

@@ -1,0 +1,89 @@
+---
+import { Picture } from 'astro:assets';
+import kit from '../assets/images/hanger/cloth-hanger-kit.jpg';
+import { hangerCategories, pricesIncludeGst } from '../lib/catalog.ts';
+import { waLink } from '../lib/whatsapp.ts';
+import Icon from './Icon.astro';
+import ProductCard from './ProductCard.astro';
+---
+{hangerCategories.map((c) => (
+  <section class="section" id="hangers" aria-labelledby="hangers-title">
+    <div class="wrap">
+      <div class="hg-intro">
+        <div class="section-head">
+          <h2 id="hangers-title">Cloth drying hangers</h2>
+          <p>{c.description}</p>
+          <ul class="hg-facts">
+            <li>Sizes from {c.products[0].size} to {c.products.at(-1)!.size}</li>
+            {c.products[0].capacity && <li>Holds {c.products[0].capacity} of clothes</li>}
+            <li>{c.deliveryNote}</li>
+            {pricesIncludeGst && <li>Prices include GST</li>}
+          </ul>
+          <a class="btn btn-wa" href={waLink('Hi, I saw your website. I want to know about your cloth drying hangers.')} target="_blank" rel="noopener">
+            <Icon name="whatsapp" /> Chat on WhatsApp
+          </a>
+        </div>
+        <figure class="hg-kit">
+          <Picture
+            src={kit}
+            formats={['avif', 'webp']}
+            widths={[360, 560, 720]}
+            sizes="(min-width: 1080px) 420px, 100vw"
+            alt="Cloth drying hanger kit: aluminium pipes, two ceiling brackets with pulleys, ropes, screws and wall plugs"
+            loading="lazy"
+            decoding="async"
+          />
+          <figcaption class="tag">Reference image</figcaption>
+        </figure>
+      </div>
+      <div class="grid">
+        {c.products.map((p) => <ProductCard product={p} />)}
+      </div>
+    </div>
+  </section>
+))}
+<style>
+  .hg-intro {
+    display: grid;
+    gap: 28px;
+    margin-bottom: 32px;
+  }
+  .hg-facts {
+    margin: 16px 0 24px;
+    padding-left: 1.2em;
+    color: var(--graphite-soft);
+  }
+  .hg-facts li + li {
+    margin-top: 4px;
+  }
+  .hg-kit {
+    position: relative;
+    margin: 0;
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: #fff;
+  }
+  .hg-kit :global(img) {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+  .grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  }
+  @media (min-width: 1080px) {
+    .hg-intro {
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      align-items: center;
+      gap: 56px;
+    }
+    .grid {
+      gap: 24px;
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>

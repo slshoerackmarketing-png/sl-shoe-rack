@@ -1,0 +1,174 @@
+---
+// "Installed in homes": photos from src/assets/images/installed/ and gallery/.
+// Real customer photos: drop them in installed/ with a descriptive name
+// ("hallway-white-single-decker.jpg"); the name becomes the caption and alt text.
+// Generated artwork is named *.illustration.jpg and is labelled on the page.
+import { Picture, getImage } from 'astro:assets';
+
+const files = import.meta.glob<{ default: ImageMetadata }>(
+  ['/src/assets/images/installed/*.{jpg,jpeg,png,webp}', '/src/assets/images/gallery/*.{jpg,jpeg,png,webp}'],
+  { eager: true },
+);
+const captions: Record<string, string> = {
+  'customer-home-single-5-step': 'Customer home · Single decker, 5 step',
+  'installed-single-4-step': 'Fixed on the wall · Single decker, 4 step',
+  'doors-open-single-4-step': 'Doors open · Single decker, 4 step',
+  'hallway-single-4-step': 'Hallway · Single decker, 4 step',
+  'entrance-double-3-step': 'Apartment entrance · Double decker, 3 step',
+  'office-double-5-step': 'Office · Double decker, 5 step',
+  'flat-single-2-step': 'Small flat · Single decker, 2 step',
+  'family-home-double-4-step': 'Family home · Double decker, 4 step',
+  'balcony-cloth-hanger': 'Balcony · Cloth drying hanger',
+};
+const photos = (
+  await Promise.all(
+    Object.entries(files).map(async ([path, mod]) => {
+      const file = path.split('/').pop()!.replace(/\.\w+$/, '');
+      const illustration = file.endsWith('.illustration');
+      const name = file.replace(/\.illustration$/, '').replace(/^\d+[-_]/, '');
+      const caption = captions[name] ?? name.replace(/[-_]+/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
+      const full = await getImage({ src: mod.default, format: 'webp', width: 1400 });
+      return { img: mod.default, caption, illustration, full: full.src };
+    }),
+  )
+)
+  // real photos first, then illustrations
+  .sort((a, b) => Number(a.illustration) - Number(b.illustration))
+  .slice(0, 9);
+const openSlots = Math.max(0, Math.min(3, 9 - photos.length) - photos.filter((p) => !p.illustration).length);
+---
+<section class="section" id="installed" aria-labelledby="installed-title">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 id="installed-title">Installed in homes</h2>
+      <p>Entrances, hallways, offices and balconies across Davangere.</p>
+    </div>
+    <ul class="gal">
+      {photos.map((p) => (
+        <li>
+          <a href={p.full} data-lb aria-label={`${p.caption}${p.illustration ? ', illustration' : ''}. Open larger image`}>
+            <Picture
+              src={p.img}
+              formats={['avif', 'webp']}
+              widths={[320, 480, 720]}
+              sizes="(min-width: 1080px) 360px, 50vw"
+              alt={`${p.illustration ? 'Illustration: ' : ''}${p.caption}`}
+              loading="lazy"
+              decoding="async"
+            />
+          </a>
+          <p class="cap">{p.caption}</p>
+        </li>
+      ))}
+      {Array.from({ length: openSlots }, () => (
+        <li aria-hidden="true">
+          <div class="slot ph"><span>Customer photo coming soon</span></div>
+          <p class="cap">Your home here</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+  <dialog class="lb" data-lb-dialog aria-label="Image">
+    <img alt="" />
+    <form method="dialog"><button class="btn btn-sm" aria-label="Close image">Close</button></form>
+  </dialog>
+</section>
+
+<style>
+  .gal {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px 10px;
+  }
+  .gal a {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    border-radius: 8px;
+  }
+  .gal :global(img) {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    transition: transform var(--t-feat) var(--ease-out);
+  }
+  @media (hover: hover) {
+    .gal a:hover :global(img) {
+      transform: scale(1.03);
+    }
+  }
+  .cap {
+    margin: 6px 0 0;
+    font-size: 0.875rem;
+    color: var(--graphite-soft);
+    line-height: 1.35;
+  }
+  .slot {
+    aspect-ratio: 4 / 5;
+    border-radius: 8px;
+    border: 1.5px dashed var(--powder);
+    padding: 12px;
+    font-size: 0.8125rem;
+    color: var(--graphite-soft);
+    text-align: center;
+  }
+  .lb {
+    max-width: min(92vw, 1100px);
+    max-height: 92vh;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-card);
+    background: var(--deep);
+    overflow: hidden;
+  }
+  .lb[open] {
+    animation: lb-in var(--t-std) var(--ease-out);
+  }
+  .lb::backdrop {
+    background: rgb(13 16 18 / 0.82);
+  }
+  .lb img {
+    max-height: calc(92vh - 64px);
+    width: auto;
+    margin: 0 auto;
+  }
+  .lb form {
+    display: flex;
+    justify-content: flex-end;
+    padding: 8px;
+  }
+  @keyframes lb-in {
+    from {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+  }
+  @media (min-width: 768px) {
+    .gal {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px 16px;
+    }
+  }
+</style>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('[data-lb-dialog]');
+  if (dialog?.showModal) {
+    const img = dialog.querySelector('img')!;
+    document.addEventListener('click', (e) => {
+      const link = (e.target as Element).closest<HTMLAnchorElement>('[data-lb]');
+      if (link) {
+        e.preventDefault();
+        img.src = link.href;
+        img.alt = link.querySelector('img')?.alt ?? '';
+        dialog.showModal();
+      } else if (e.target === dialog) {
+        dialog.close(); // backdrop click
+      }
+    });
+  }
+</script>

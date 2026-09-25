@@ -1,0 +1,232 @@
+---
+import site from '../data/site.json';
+import { products } from '../lib/catalog.ts';
+import { isSet } from '../lib/format.ts';
+import { waLink } from '../lib/whatsapp.ts';
+import Icon from './Icon.astro';
+
+const keyReady = isSet(site.web3formsKey);
+if (!keyReady) console.warn('[EnquiryForm] TODO: site.json web3formsKey is not set; the form cannot deliver yet.');
+const thankYou = new URL('/thank-you/', Astro.site).href;
+---
+<section class="section" id="enquire" aria-labelledby="enquire-title">
+  <div class="wrap enq">
+    <div class="enq-intro">
+      <h2 id="enquire-title">Ask about a rack</h2>
+      <p class="muted">Leave your number and we'll call you back. Faster: message us on WhatsApp or call the shop.</p>
+      <div class="btn-row">
+        <a class="btn btn-wa" href={waLink()} target="_blank" rel="noopener"><Icon name="whatsapp" /> Chat on WhatsApp</a>
+        <a class="btn btn-ghost" href={`tel:${site.phoneIntl}`}><Icon name="phone" /> Call the shop</a>
+      </div>
+    </div>
+
+    <form
+      class="form"
+      action="https://api.web3forms.com/submit"
+      method="POST"
+      data-enquiry
+      data-wa={site.whatsapp}
+      data-ready={keyReady ? 'true' : 'false'}
+      data-fab-away
+    >
+      <input type="hidden" name="access_key" value={site.web3formsKey} />
+      <input type="hidden" name="subject" value="New enquiry from SL Shoe Rack website" />
+      <input type="hidden" name="from_name" value={`${site.shortName} website`} />
+      <input type="hidden" name="redirect" value={thankYou} />
+      <input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+      <div class="field">
+        <label for="f-name">Name</label>
+        <input id="f-name" name="name" type="text" required maxlength="80" autocomplete="name" />
+      </div>
+      <div class="field">
+        <label for="f-phone">Phone number</label>
+        <input
+          id="f-phone"
+          name="phone"
+          type="tel"
+          inputmode="numeric"
+          required
+          autocomplete="tel"
+          pattern="(\+?91 ?)?[6-9][0-9]{4} ?[0-9]{5}"
+          title="10-digit mobile number, for example 98864 04287"
+          aria-describedby="f-phone-hint"
+        />
+        <small id="f-phone-hint">10-digit mobile number. +91 is optional.</small>
+      </div>
+      <div class="field">
+        <label for="f-rack">Rack interested in <span class="opt">(optional)</span></label>
+        <select id="f-rack" name="rack">
+          <option value="">Choose a rack</option>
+          {products.map((p) => <option value={`${p.title} (${p.priceLabel})`}>{p.title}, {p.priceLabel}</option>)}
+          <option>Not sure yet</option>
+          <option>Wholesale / bulk</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="f-msg">Message <span class="opt">(optional)</span></label>
+        <textarea id="f-msg" name="message" rows="4" maxlength="1000"></textarea>
+      </div>
+      <button class="btn submit" type="submit">Send enquiry</button>
+      <div class="status" role="status" aria-live="polite" data-status></div>
+    </form>
+  </div>
+</section>
+
+<style>
+  .enq {
+    display: grid;
+    gap: 32px;
+  }
+  .enq-intro p {
+    margin-bottom: 20px;
+  }
+  .form {
+    display: grid;
+    gap: 18px;
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+  }
+  .field {
+    display: grid;
+    gap: 6px;
+  }
+  label {
+    font-weight: 600;
+    font-size: 0.9375rem;
+  }
+  .opt {
+    font-weight: 400;
+    color: var(--graphite-soft);
+  }
+  input,
+  select,
+  textarea {
+    width: 100%;
+    min-height: 48px;
+    padding: 10px 14px;
+    border: 1.5px solid var(--field-border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--graphite);
+    font: inherit;
+    font-size: 1rem;
+    transition:
+      border-color var(--t-micro) var(--ease-std),
+      box-shadow var(--t-micro) var(--ease-std);
+  }
+  textarea {
+    resize: vertical;
+  }
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgb(61 85 104 / 0.25);
+  }
+  input:user-invalid {
+    border-color: #b3261e;
+  }
+  small {
+    color: var(--graphite-soft);
+    font-size: 0.8125rem;
+  }
+  .hp {
+    display: none;
+  }
+  .submit {
+    justify-self: start;
+    min-width: 180px;
+  }
+  .status:empty {
+    display: none;
+  }
+  .status {
+    padding: 14px 16px;
+    border-radius: 8px;
+    background: var(--panel);
+    animation: card-in var(--t-std) var(--ease-out);
+  }
+  .status[data-kind='ok'] {
+    background: var(--ok-bg);
+  }
+  .status[data-kind='error'] {
+    background: var(--err-bg);
+    color: var(--err-fg);
+  }
+  .status :global(a) {
+    font-weight: 600;
+    color: inherit;
+  }
+  @keyframes card-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
+  @media (min-width: 768px) {
+    .form {
+      padding: 28px;
+    }
+  }
+  @media (min-width: 1080px) {
+    .enq {
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
+      gap: 64px;
+      align-items: start;
+    }
+  }
+</style>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-enquiry]');
+  if (form) {
+    const status = form.querySelector<HTMLElement>('[data-status]')!;
+    const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    const show = (kind: 'ok' | 'error', html: string) => {
+      status.dataset.kind = kind;
+      status.innerHTML = html;
+    };
+    // WhatsApp fallback carries what the visitor already typed.
+    const waFallback = (data: FormData) => {
+      const parts = [
+        `Hi, I'm ${data.get('name')}.`,
+        data.get('rack') ? `Rack: ${data.get('rack')}.` : '',
+        String(data.get('message') || ''),
+        `My number: ${data.get('phone')}`,
+      ].filter(Boolean);
+      return `https://wa.me/${form.dataset.wa}?text=${encodeURIComponent(parts.join(' '))}`;
+    };
+    const fail = (data: FormData) =>
+      show(
+        'error',
+        `Couldn't send. Check your connection or <a href="${waFallback(data)}" target="_blank" rel="noopener">message us on WhatsApp</a>.`,
+      );
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = new FormData(form);
+      if (data.get('botcheck')) return show('ok', "Thanks, we'll call you back soon.");
+      if (form.dataset.ready !== 'true') return fail(data); // TODO: web3formsKey not configured yet
+      data.delete('redirect');
+      button.disabled = true;
+      button.textContent = 'Sending…';
+      status.textContent = '';
+      try {
+        const res = await fetch(form.action, { method: 'POST', body: data, headers: { Accept: 'application/json' } });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok || !json.success) throw new Error(json.message || res.statusText);
+        form.reset();
+        show('ok', "Thanks, we'll call you back soon.");
+      } catch {
+        fail(data);
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Send enquiry';
+      }
+    });
+  }
+</script>

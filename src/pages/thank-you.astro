@@ -1,0 +1,18 @@
+---
+import Base from '../layouts/Base.astro';
+import site from '../data/site.json';
+import { waLink } from '../lib/whatsapp.ts';
+import Icon from '../components/Icon.astro';
+---
+<Base title={`Thank you | ${site.name}`} description="Your enquiry has been sent." noindex>
+  <section class="section">
+    <div class="wrap">
+      <h1>Thanks, we'll call you back soon.</h1>
+      <p class="muted">Your enquiry reached {site.name}. Need an answer now? Message us on WhatsApp.</p>
+      <div class="btn-row">
+        <a class="btn" href="/">Back to home</a>
+        <a class="btn btn-wa" href={waLink()} target="_blank" rel="noopener"><Icon name="whatsapp" /> Chat on WhatsApp</a>
+      </div>
+    </div>
+  </section>
+</Base>

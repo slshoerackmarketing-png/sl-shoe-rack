@@ -1,0 +1,98 @@
+---
+// JSON-LD: FurnitureStore (LocalBusiness) + products. All values from src/data/*.json.
+import site from '../data/site.json';
+import { maxPrice, minPrice, photoFor, products as all, type Product } from '../lib/catalog.ts';
+import { formatINR, isSet } from '../lib/format.ts';
+import { getImage } from 'astro:assets';
+
+interface Props {
+  /** Omit for the full catalog (ItemList); pass one product on its detail page. */
+  product?: Product;
+}
+const { product } = Astro.props;
+const origin = Astro.site!;
+const home = new URL('/', origin).href;
+const storeId = `${home}#store`;
+
+const store = {
+  '@type': 'FurnitureStore',
+  '@id': storeId,
+  name: site.name,
+  alternateName: site.googleProfileName,
+  slogan: site.tagline,
+  url: home,
+  image: new URL('/og-image.jpg', origin).href,
+  telephone: site.phoneIntl,
+  ...(isSet(site.email) && { email: site.email }),
+  priceRange: `${formatINR(minPrice)}–${formatINR(maxPrice)}`,
+  currenciesAccepted: 'INR',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: `${site.address.line1}, ${site.address.street}`,
+    addressLocality: site.address.city,
+    addressRegion: site.address.state,
+    postalCode: site.address.pincode,
+    addressCountry: site.address.country,
+  },
+  areaServed: site.deliveryArea,
+  hasMap: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(site.mapsQuery)}`,
+  // TODO: geo needs lat/long from Google Maps (site.json → geo)
+  ...(site.geo.lat != null && {
+    geo: { '@type': 'GeoCoordinates', latitude: site.geo.lat, longitude: site.geo.lng },
+  }),
+  ...(Array.isArray(site.hours.days) && {
+    openingHoursSpecification: {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: site.hours.days,
+      opens: site.hours.open,
+      closes: site.hours.close,
+    },
+  }),
+  foundingDate: String(site.foundingYear),
+  ...(site.contactPeople[0] && isSet(site.contactPeople[0].name) && {
+    employee: { '@type': 'Person', name: site.contactPeople[0].name, telephone: site.contactPeople[0].phone },
+  }),
+  sameAs: [site.googleProfileUrl, site.instagramUrl].filter(isSet),
+};
+
+const toProduct = async (p: Product) => {
+  const photo = photoFor(p.image)?.src;
+  return {
+    '@type': 'Product',
+    name: p.noun ? `${p.title} metal ${p.noun}` : p.title,
+    description: p.kind === 'rack' ? `Wall-mounted powder-coated metal shoe rack. ${p.description}` : p.description,
+    sku: p.id,
+    url: new URL(p.url, origin).href,
+    category: p.kind === 'rack' ? 'Shoe racks' : 'Cloth drying hangers',
+    ...(p.kind === 'rack' && { material: 'Powder-coated steel' }),
+    ...(p.colours.length && { color: p.colours.join(', ') }),
+    ...(photo && { image: new URL((await getImage({ src: photo, format: 'webp', width: 1200 })).src, origin).href }),
+    ...(p.heightIn && { height: { '@type': 'QuantitativeValue', value: p.heightIn, unitCode: 'INH' } }),
+    ...(p.widthIn && { width: { '@type': 'QuantitativeValue', value: p.widthIn, unitCode: 'INH' } }),
+    offers: {
+      '@type': 'Offer',
+      price: p.price,
+      priceCurrency: 'INR',
+      availability: 'https://schema.org/InStock',
+      url: new URL(p.url, origin).href,
+      seller: { '@id': storeId },
+    },
+  };
+};
+
+const graph = [
+  store,
+  product
+    ? await toProduct(product)
+    : {
+        '@type': 'ItemList',
+        name: `${site.name} shoe rack prices`,
+        numberOfItems: all.length,
+        itemListElement: await Promise.all(
+          all.map(async (p, i) => ({ '@type': 'ListItem', position: i + 1, item: await toProduct(p) })),
+        ),
+      },
+];
+const json = JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }).replace(/</g, '\u003c');
+---
+<script type="application/ld+json" set:html={json} is:inline />

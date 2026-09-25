@@ -1,0 +1,188 @@
+{
+  "currency": "INR",
+  "lastUpdated": "2026-09-25",
+  "pricesIncludeGst": true,
+  "categories": [
+    {
+      "id": "single",
+      "kind": "rack",
+      "name": "Single decker",
+      "noun": "shoe rack",
+      "columns": 1,
+      "description": "One column of flip-down compartments. Ideal for flats and small entrances.",
+      "colours": [
+        "Grey white",
+        "Coffee white",
+        "Ivory"
+      ],
+      "deliveryNote": "Free delivery and fitting within 10 km of Davangere. Outside that, delivery is charged as per distance.",
+      "products": [
+        {
+          "id": "single-2-step",
+          "steps": 2,
+          "price": 3499,
+          "heightIn": 28,
+          "widthIn": 25,
+          "depthIn": 5.5,
+          "openDepthIn": 14,
+          "capacity": "6 pairs",
+          "image": "single-2-step"
+        },
+        {
+          "id": "single-3-step",
+          "steps": 3,
+          "price": 4799,
+          "heightIn": 41,
+          "widthIn": 25,
+          "depthIn": 5.5,
+          "openDepthIn": 14,
+          "capacity": "9 pairs",
+          "image": "single-3-step"
+        },
+        {
+          "id": "single-4-step",
+          "steps": 4,
+          "price": 5799,
+          "heightIn": 54,
+          "widthIn": 25,
+          "depthIn": 5.5,
+          "openDepthIn": 14,
+          "capacity": "12 pairs",
+          "image": "single-4-step"
+        },
+        {
+          "id": "single-5-step",
+          "steps": 5,
+          "price": 6799,
+          "heightIn": 66,
+          "widthIn": 25,
+          "depthIn": 5.5,
+          "openDepthIn": 14,
+          "capacity": "15 pairs",
+          "image": "single-5-step"
+        }
+      ]
+    },
+    {
+      "id": "double",
+      "kind": "rack",
+      "name": "Double decker",
+      "noun": "shoe rack",
+      "columns": 2,
+      "description": "Two columns side by side. Holds more pairs for larger families and offices.",
+      "colours": [
+        "Black",
+        "Ivory",
+        "Coffee white",
+        "Grey white"
+      ],
+      "deliveryNote": "Free delivery and fitting within 10 km of Davangere. Outside that, delivery is charged as per distance.",
+      "products": [
+        {
+          "id": "double-2-step",
+          "steps": 2,
+          "price": 7499,
+          "heightIn": 28,
+          "widthIn": 26,
+          "depthIn": 7.5,
+          "openDepthIn": 13.8,
+          "capacity": "12 pairs",
+          "image": "double-2-step"
+        },
+        {
+          "id": "double-3-step",
+          "steps": 3,
+          "price": 8999,
+          "heightIn": 43,
+          "widthIn": 26,
+          "depthIn": 7.5,
+          "openDepthIn": 13.8,
+          "capacity": "18 pairs",
+          "image": "double-3-step"
+        },
+        {
+          "id": "double-4-step",
+          "steps": 4,
+          "price": 10999,
+          "heightIn": 58,
+          "widthIn": 26,
+          "depthIn": 7.5,
+          "openDepthIn": 13.8,
+          "capacity": "24 pairs",
+          "image": "double-4-step"
+        },
+        {
+          "id": "double-5-step",
+          "steps": 5,
+          "price": 13499,
+          "heightIn": 71,
+          "widthIn": 26,
+          "depthIn": 7.5,
+          "openDepthIn": 13.8,
+          "capacity": "30 pairs",
+          "image": "double-5-step"
+        }
+      ]
+    },
+    {
+      "id": "hanger",
+      "kind": "hanger",
+      "name": "Cloth drying hanger",
+      "noun": "",
+      "columns": 0,
+      "description": "Ceiling-mounted drying hanger for balconies and utility areas. Pull the ropes to lower the pipes, hang clothes, and lift them up to dry.",
+      "colours": null,
+      "deliveryNote": "Free delivery within 10 km of Davangere, fitting ₹400. Outside that, fitting is ₹1,000 and delivery is charged as per distance.",
+      "products": [
+        {
+          "id": "hanger-5-ft",
+          "feet": 5,
+          "price": 2999,
+          "size": "5 ft × 2 ft",
+          "capacity": "10 to 15 kg",
+          "image": "cloth-hanger"
+        },
+        {
+          "id": "hanger-6-ft",
+          "feet": 6,
+          "price": 3499,
+          "size": "6 ft × 2 ft",
+          "capacity": "10 to 15 kg",
+          "image": "cloth-hanger"
+        },
+        {
+          "id": "hanger-7-ft",
+          "feet": 7,
+          "price": 3999,
+          "size": "7 ft × 2 ft",
+          "capacity": "10 to 15 kg",
+          "image": "cloth-hanger"
+        },
+        {
+          "id": "hanger-8-ft",
+          "feet": 8,
+          "price": 4499,
+          "size": "8 ft × 2 ft",
+          "capacity": "10 to 15 kg",
+          "image": "cloth-hanger"
+        },
+        {
+          "id": "hanger-9-ft",
+          "feet": 9,
+          "price": 4999,
+          "size": "9 ft × 2 ft",
+          "capacity": "10 to 15 kg",
+          "image": "cloth-hanger"
+        },
+        {
+          "id": "hanger-10-ft",
+          "feet": 10,
+          "price": 5499,
+          "size": "10 ft × 2 ft",
+          "capacity": "10 to 15 kg",
+          "image": "cloth-hanger"
+        }
+      ]
+    }
+  ]
+}

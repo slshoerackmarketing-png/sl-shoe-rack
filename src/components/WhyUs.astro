@@ -1,0 +1,81 @@
+---
+import site from '../data/site.json';
+import Icon from './Icon.astro';
+
+const points = [
+  { icon: 'shield', title: 'Strong metal build', text: 'Powder-coated steel that lasts.' },
+  { icon: 'wall', title: 'Saves floor space', text: 'Mounts on the wall, keeps passages clear.' },
+  { icon: 'ruler', title: 'Fits every home', text: 'Sizes from 2 to 5 steps, single or double decker.' },
+  { icon: 'pin', title: 'Local and reachable', text: `Visit the shop on ${site.address.street} or message us.` },
+] as const;
+---
+<section class="section" id="why" aria-labelledby="why-title">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 id="why-title">Why SL Shoe Rack</h2>
+      <p>{site.tagline} We have been making our own metal shoe racks in {site.address.city} since {site.foundingYear}.</p>
+    </div>
+    <ul class="why">
+      {points.map((p) => (
+        <li>
+          <span class="why-icon"><Icon name={p.icon} size={24} /></span>
+          <div>
+            <h3>{p.title}</h3>
+            <p>{p.text}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+    <ul class="facts" aria-label="Good to know">
+      {site.facts.map((f) => <li>{f}</li>)}
+    </ul>
+  </div>
+</section>
+<style>
+  .why {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 28px 48px;
+  }
+  .why li {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding-top: 20px;
+    border-top: 2px solid var(--graphite);
+  }
+  .why-icon {
+    flex: none;
+    color: var(--accent);
+    padding-top: 1px;
+  }
+  .why h3 {
+    margin-bottom: 4px;
+  }
+  .why p {
+    margin: 0;
+    color: var(--graphite-soft);
+  }
+  .facts {
+    list-style: none;
+    margin: 40px 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .facts li {
+    padding: 8px 14px;
+    border-radius: var(--radius-pill);
+    background: var(--panel);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  @media (min-width: 768px) {
+    .why {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

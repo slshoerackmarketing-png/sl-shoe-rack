@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.astro/
+.DS_Store
+
+# Internal build brief, not part of the production site
+CLAUDE.md
+.claude/
+*.log

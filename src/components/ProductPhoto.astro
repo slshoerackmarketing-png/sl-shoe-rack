@@ -1,0 +1,73 @@
+---
+// Product image from src/assets/images/products/<id>.*: a real photo, else generated artwork
+// (labelled "Illustration"), else a CSS/SVG placeholder.
+import { Picture } from 'astro:assets';
+import { photoFor, type Product } from '../lib/catalog.ts';
+import RackSvg from './RackSvg.astro';
+
+interface Props {
+  product: Product;
+  sizes?: string;
+  eager?: boolean;
+}
+const { product: p, sizes = '(min-width: 1080px) 360px, (min-width: 768px) 45vw, 100vw', eager = false } = Astro.props;
+const photo = photoFor(p.image);
+const noun = p.kind === 'hanger' ? 'ceiling cloth drying hanger' : 'wall-mounted metal shoe rack';
+const alt = photo?.illustration
+  ? `Illustration of the ${p.title} ${noun}${p.colours[0] ? ` in ${p.colours[0].toLowerCase()}` : ''}`
+  : `${p.title} ${noun}`;
+---
+{photo ? (
+  <div class="pp-wrap">
+    <Picture
+      src={photo.src}
+      formats={['avif', 'webp']}
+      widths={[360, 560, 800]}
+      sizes={sizes}
+      alt={alt}
+      class:list={['pp', { 'pp-contain': p.kind === 'hanger' }]}
+      loading={eager ? 'eager' : 'lazy'}
+      decoding="async"
+    />
+  </div>
+) : (
+  <div class="pp ph" role="img" aria-label={`Photo coming soon: ${p.title}`}>
+    <RackSvg steps={p.steps || 3} columns={p.columns || 1} />
+    <span class="ph-note" aria-hidden="true">Photo coming soon</span>
+  </div>
+)}
+<style>
+  .pp-wrap {
+    position: relative;
+  }
+  .pp {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    background: var(--panel);
+  }
+  .pp-contain {
+    object-fit: cover;
+    object-position: 50% 30%;
+  }
+  .ph {
+    position: relative;
+    padding: 12% 0 16%;
+  }
+  .ph :global(.rk) {
+    --rk-body: transparent;
+    --rk-door: var(--chalk);
+    --rk-line: var(--powder);
+    height: 100%;
+    width: auto;
+  }
+  .ph-note {
+    position: absolute;
+    left: 12px;
+    bottom: 10px;
+    font-size: 0.75rem;
+    color: var(--graphite-soft);
+  }
+</style>
